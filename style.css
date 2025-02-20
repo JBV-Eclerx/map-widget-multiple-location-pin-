@@ -1,53 +1,91 @@
-/* Basic reset */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-  }
-  
-  .container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  h1 {
-    margin-bottom: 20px;
-  }
-  
-  #map {
-    height: 500px;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
-  form {
-    margin-top: 20px;
-  }
-  
-  input {
-    padding: 10px;
-    font-size: 16px;
-    width: 250px;
-    margin-right: 10px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #3498db;
-    color: white;
-    border: none;
-  }
-  
-  button:hover {
-    background-color: #2980b9;
-  }
-  
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fce8e8;
+}
+
+.container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+#map {
+  height: 500px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+form {
+  margin-top: 20px;
+  display: none;  /* Hide the form by default */
+  position: absolute;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.3s ease;
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  width: 250px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #3498db;
+  color: white;
+  border: none;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+#location-list-container {
+  position: absolute;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+#location-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+#location-list li {
+  margin: 5px 0;
+  font-size: 18px;
+}
+
+#location-list li button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#location-list li button:hover {
+  background-color: darkred;
+}
