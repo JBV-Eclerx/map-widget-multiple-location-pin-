@@ -3,31 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Location Map</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>Interactive Map with Australia SVG</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Interactive Location Map</h1>
+  <div class="map-container">
+    <div class="resizer"></div>
+    <div id="svg-container"></div>
+    <div class="location-form">
+        <div class="form-header">
+            Add Location
+        </div>
+        <div class="form-content">
+            <div class="form-group">
+                <label>Location Name</label>
+                <input type="text" id="location-name" placeholder="Enter location name">
+            </div>
+            
+            <div class="form-group">
+                <label>Map Symbol</label>
+                <select id="symbol-select" class="symbol-select">
+                    <option value="gpin">📍 Location Pin</option>
+                    <option value="🔴">🔴 Dot</option>
+                    <option value="⭐">⭐ Star</option>
+                    <option value="🎯">🎯 Target</option>
+                </select>
+            </div>
 
-    <!-- Map Container -->
-    <div id="map" class="map"></div>
+            <div class="form-group">
+                <label>Colors</label>
+                <div class="color-group">
+                    <div>
+                        <small>Symbol</small>
+                        <input type="color" id="symbol-color" class="color-picker" value="#0070ED">
+                    </div>
+                    <div>
+                        <small>Map</small>
+                        <input type="color" id="map-color" class="color-picker" value="#d3d3d3">
+                    </div>
+                </div>
+            </div>
 
-    <!-- Form to Add Locations -->
-    <form id="location-form">
-      <input type="text" id="location-name" placeholder="Enter location (city)" required>
-      <button type="submit">Add Location</button>
-    </form>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addLocation()">Add Location</button>
+                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+            </div>
 
-    <!-- Location List -->
-    <div id="location-list-container">
-      <h3>Added Locations</h3>
-      <ul id="location-list"></ul>
+            <div class="location-list" id="location-list"></div>
+        </div>
     </div>
-  </div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <div class="delete-confirm">
+        <p>Are you sure you want to delete this location?</p>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
+            <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
+        </div>
+    </div>
+</div>
+
   <script src="script.js"></script>
 </body>
 </html>
