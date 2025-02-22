@@ -99,12 +99,14 @@ body {
   .delete-btn:hover {
     background: #cc0000 !important;
   }
+  
   .google-pin {
     width: 24px;
     height: 24px;
     display: inline-block;
     vertical-align: middle;
-  }
+}
+
   
   .pin-option {
     display: flex;

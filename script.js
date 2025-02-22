@@ -63,16 +63,65 @@ function addPin(location) {
     const pin = document.createElement('div');
     pin.className = 'location-pin';
     pin.title = location.name;
-    pin.style.left = `${location.x}px`;
-    pin.style.top = `${location.y}px`;
     pin.dataset.id = location.id;
 
+    // Calculate relative positions (percentages) based on initial size
+    location.xPercentage = location.x / initialMapWidth;
+    location.yPercentage = location.y / initialMapHeight;
+
+    // Set the initial pin position using the current width and height
+    pin.style.left = `${location.x}px`;
+    pin.style.top = `${location.y}px`;
+
+    // Check if the symbol is the Google pin (gpin)
     if (location.symbol === 'gpin') {
-        // Replace fill color in the SVG string
         const coloredPinSvg = pinSvg.replace(/fill="[^"]*"/, `fill="${location.color}"`);
-        pin.innerHTML = coloredPinSvg;
+
+        // Create a container for the SVG
+        const svgContainer = document.createElement('div');
+        svgContainer.className = 'google-pin';
+        svgContainer.innerHTML = coloredPinSvg;
+
+        // Ensure it's the right size for the pin (matching the other symbols)
+        svgContainer.style.width = '24px';
+        svgContainer.style.height = '24px';
+
+        pin.appendChild(svgContainer);
     } else {
-        pin.innerHTML = location.symbol;
+        pin.innerHTML = location.symbol;function addPin(location) {
+            const pin = document.createElement('div');
+            pin.className = 'location-pin';
+            pin.title = location.name;
+            pin.dataset.id = location.id;
+        
+            // Calculate relative positions (percentages) based on initial size
+            location.xPercentage = location.x / initialMapWidth;
+            location.yPercentage = location.y / initialMapHeight;
+        
+            // Set the initial pin position using the current width and height
+            pin.style.left = `${location.x}px`;
+            pin.style.top = `${location.y}px`;
+        
+            // Check if the symbol is the Google pin (gpin)
+            if (location.symbol === 'gpin') {
+                // Create an img element to embed the SVG
+                const svgImg = document.createElement('img');
+                svgImg.src = 'gpin.svg';  // Path to your gpin.svg file
+                svgImg.style.width = '24px';  // Set the size to match the other symbols
+                svgImg.style.height = '24px';
+        
+                // If you want to color the pin, you need to edit the SVG inline (if possible), or you can modify the image color directly using a filter.
+                svgImg.style.filter = `fill(${location.color})`;  // Apply the color filter to the SVG image
+        
+                pin.appendChild(svgImg);  // Append the image to the pin
+            } else {
+                pin.innerHTML = location.symbol;
+                pin.style.color = location.color;
+            }
+        
+            mapContainer.appendChild(pin);
+        }
+        
         pin.style.color = location.color;
     }
 
@@ -202,7 +251,7 @@ resizer.addEventListener('mousedown', (e) => {
     });
 });
 
-// Resize handling logic
+// Handle resizing the container and SVG
 function handleResize(e) {
     if (isResizing) {
         const width = e.clientX - mapContainer.getBoundingClientRect().left;
@@ -221,20 +270,16 @@ function handleResize(e) {
         svg.setAttribute('width', `${width}px`);
         svg.setAttribute('height', `${height}px`);
 
-        // Calculate the scaling ratio for both width and height
-        const widthRatio = width / initialMapWidth;
-        const heightRatio = height / initialMapHeight;
+        // Update pin positions based on the new size
+        updatePinPositions();
 
-        // Adjust the position of the pins based on the scaling ratio
-        updatePinPositions(widthRatio, heightRatio);
-
-        // Update the initial size to the new dimensions
+        // Store new size as initial size for future calculations
         initialMapWidth = width;
         initialMapHeight = height;
     }
 }
 
-function updatePinPositions(widthRatio, heightRatio) {
+function updatePinPositions() {
     // Update each pin position based on the new size of the map container
     const pins = document.querySelectorAll('.location-pin');
     pins.forEach(pin => {
@@ -242,9 +287,9 @@ function updatePinPositions(widthRatio, heightRatio) {
         const location = locations.find(loc => loc.id === Number(locationId));
 
         if (location) {
-            // Recalculate pin position based on resizing
-            const newX = location.x * widthRatio;
-            const newY = location.y * heightRatio;
+            // Calculate new positions based on the stored percentage
+            const newX = location.xPercentage * initialMapWidth;
+            const newY = location.yPercentage * initialMapHeight;
 
             pin.style.left = `${newX}px`;
             pin.style.top = `${newY}px`;
