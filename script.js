@@ -91,15 +91,8 @@ function addPin(location) {
     // Get the appropriate SVG content based on the selected style
     let pinSvg = pins[location.symbol];
     
-    // Handle the color replacement for different SVGs
-    if (location.symbol === 'style1' || location.symbol === 'style4') {
-        // Standard fill replacement for style1 and style4
-        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);
-    } else if (location.symbol === 'style2' || location.symbol === 'style3') {
-        // For style2 and style3, ensure we target the correct color properties
-        pinSvg = pinSvg.replace(/stroke="[^"]*"/g, `stroke="${location.color}"`); // Check if `stroke` is used
-        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);  // Apply fill change
-    }
+    // Replace the fill color in the SVG
+    pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);
     
     // Set the SVG with the selected size
     svgContainer.innerHTML = pinSvg;
@@ -171,6 +164,7 @@ function addLocation() {
     const name = nameInput.value.trim();
     const symbol = document.getElementById('symbol-select').value;
     const symbolColor = document.getElementById('symbol-color').value;
+    const pinSize = document.getElementById('pin-size').value;
 
     if (name === '') {
         alert('Please enter a location name');
@@ -184,7 +178,7 @@ function addLocation() {
         y: currentClickPos.y,
         symbol: symbol,
         color: symbolColor,
-        size: 24 // Default size
+        size: pinSize // Set the pin size from the form input
     };
 
     locations.push(location);
@@ -315,3 +309,13 @@ function updatePinPositions() {
         }
     });
 }
+
+// Pin size range input dynamic label update
+const pinSizeInput = document.getElementById('pin-size');
+const pinSizeDisplay = document.getElementById('pin-size-display');
+
+// Add event listener to update the pin size display dynamically when the range slider is changed
+pinSizeInput.addEventListener('input', function() {
+    const pinSize = pinSizeInput.value;
+    pinSizeDisplay.textContent = `${pinSize}px`; // Update the display to show the current size
+});
