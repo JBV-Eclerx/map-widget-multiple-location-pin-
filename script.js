@@ -251,44 +251,50 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Resizing functionality for the map container and the SVG
+// Resizing functionality for the map container and the SVG with perfect scaling
 const resizer = document.querySelector('.resizer');
 let isResizing = false;
 
 resizer.addEventListener('mousedown', (e) => {
     e.preventDefault();
     isResizing = true;
-    document.addEventListener('mousemove', handleResize);
+    document.addEventListener('mousemove', handlePerfectResize);
     document.addEventListener('mouseup', () => {
         isResizing = false;
-        document.removeEventListener('mousemove', handleResize);
+        document.removeEventListener('mousemove', handlePerfectResize);
     });
 });
 
-function handleResize(e) {
+function handlePerfectResize(e) {
     if (isResizing) {
-        const width = e.clientX - mapContainer.getBoundingClientRect().left;
-        const height = e.clientY - mapContainer.getBoundingClientRect().top;
+        const rect = mapContainer.getBoundingClientRect();
+        const width = e.clientX - rect.left;
+        const height = e.clientY - rect.top;
+
+        // Ensure the aspect ratio is preserved during resizing
+        const aspectRatio = initialMapWidth / initialMapHeight;
+        const newHeight = Math.min(height, width / aspectRatio);
+        const newWidth = newHeight * aspectRatio;
 
         // Update the size of the map container
-        mapContainer.style.width = `${width}px`;
-        mapContainer.style.height = `${height}px`;
+        mapContainer.style.width = `${newWidth}px`;
+        mapContainer.style.height = `${newHeight}px`;
 
         // Update the SVG container size
-        svgContainer.style.width = `${width}px`;
-        svgContainer.style.height = `${height}px`;
+        svgContainer.style.width = `${newWidth}px`;
+        svgContainer.style.height = `${newHeight}px`;
 
         // Resize the SVG content within the container to fit the new size
         const svg = svgContainer.querySelector('svg');
-        svg.setAttribute('width', `${width}px`);
-        svg.setAttribute('height', `${height}px`);
+        svg.setAttribute('width', `${newWidth}px`);
+        svg.setAttribute('height', `${newHeight}px`);
 
         // Update pin positions based on the new size
         updatePinPositions();
 
         // Store new size as initial size for future calculations
-        initialMapWidth = width;
-        initialMapHeight = height;
+        initialMapWidth = newWidth;
+        initialMapHeight = newHeight;
     }
 }
 
@@ -309,13 +315,3 @@ function updatePinPositions() {
         }
     });
 }
-
-// Pin size range input dynamic label update
-const pinSizeInput = document.getElementById('pin-size');
-const pinSizeDisplay = document.getElementById('pin-size-display');
-
-// Add event listener to update the pin size display dynamically when the range slider is changed
-pinSizeInput.addEventListener('input', function() {
-    const pinSize = pinSizeInput.value;
-    pinSizeDisplay.textContent = `${pinSize}px`; // Update the display to show the current size
-});
