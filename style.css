@@ -215,3 +215,9 @@ body {
   right: 0;
   cursor: se-resize;
 }
+
+.pin-size-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

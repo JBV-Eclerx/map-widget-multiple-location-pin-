@@ -2,6 +2,10 @@ const mapContainer = document.querySelector('.map-container');
 const svgContainer = document.getElementById('svg-container');
 const locationForm = document.querySelector('.location-form');
 const deleteConfirm = document.querySelector('.delete-confirm');
+const pinSizeRange = document.getElementById('pin-size');
+const pinSizeDisplay = document.getElementById('pin-size-display');
+const customPinSizeInput = document.getElementById('custom-pin-size');
+
 
 let locations = [];
 let currentClickPos = { x: 0, y: 0 };
@@ -101,42 +105,43 @@ function addPin(location) {
 
     pin.appendChild(svgContainer);
     
-    // Add resize handle
-    const resizeHandle = document.createElement('div');
-    resizeHandle.className = 'pin-resize-handle';
-    pin.appendChild(resizeHandle);
+// Add resize handle
+const resizeHandle = document.createElement('div');
+resizeHandle.className = 'pin-resize-handle';
+pin.appendChild(resizeHandle);
 
-    // Add resize functionality
-    let isResizing = false;
-    let startSize = 0;
-    let startY = 0;
+// Add resize functionality
+let isResizing = false;
+let startSize = 0;
+let startY = 0;
 
-    resizeHandle.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        startSize = parseInt(svgContainer.style.width);
-        startY = e.clientY;
-        e.stopPropagation();
-    });
+resizeHandle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startSize = parseInt(svgContainer.style.width);
+    startY = e.clientY;
+    e.stopPropagation();
+});
 
-    document.addEventListener('mousemove', (e) => {
-        if (!isResizing) return;
-        
-        const diff = startY - e.clientY;
-        const newSize = Math.max(12, Math.min(48, startSize + diff));
-        
-        svgContainer.style.width = `${newSize}px`;
-        svgContainer.style.height = `${newSize}px`;
-        
-        // Update location object
-        const locationObj = locations.find(loc => loc.id === parseInt(pin.dataset.id));
-        if (locationObj) {
-            locationObj.size = newSize;
-        }
-    });
+document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
 
-    document.addEventListener('mouseup', () => {
-        isResizing = false;
-    });
+    const diff = startY - e.clientY;
+    // Apply the new size with a limit of 12px min and 200px max
+    const newSize = Math.max(12, Math.min(200, startSize + diff));
+
+    svgContainer.style.width = `${newSize}px`;
+    svgContainer.style.height = `${newSize}px`;
+
+    // Update location object with new size
+    const locationObj = locations.find(loc => loc.id === parseInt(pin.dataset.id));
+    if (locationObj) {
+        locationObj.size = newSize;
+    }
+});
+
+document.addEventListener('mouseup', () => {
+    isResizing = false;
+});
 
     mapContainer.appendChild(pin);
 }
@@ -292,7 +297,7 @@ function handlePerfectResize(e) {
         // Update pin positions based on the new size
         updatePinPositions();
 
-        // Store new size as initial size for future calculations
+        // Update the initial map size for future reference
         initialMapWidth = newWidth;
         initialMapHeight = newHeight;
     }
@@ -306,12 +311,32 @@ function updatePinPositions() {
         const location = locations.find(loc => loc.id === Number(locationId));
 
         if (location) {
-            // Calculate new positions based on the stored percentage
+            // Calculate new positions based on the new size of the map
             const newX = location.xPercentage * initialMapWidth;
             const newY = location.yPercentage * initialMapHeight;
 
             pin.style.left = `${newX}px`;
             pin.style.top = `${newY}px`;
+
+            // Update the size of the pin based on its current size
+            const svgContainer = pin.querySelector('.pin-svg-container');
+            svgContainer.style.width = `${location.size || 24}px`;
+            svgContainer.style.height = `${location.size || 24}px`;
         }
     });
 }
+// Update pin size display dynamically as the range is adjusted
+pinSizeRange.addEventListener('input', (e) => {
+    const pinSize = e.target.value;
+    pinSizeDisplay.textContent = `${pinSize}px`; // Update the label to show the current size
+    customPinSizeInput.value = pinSize; // Sync the number input value with the range
+});
+
+// Allow the user to enter a custom pin size via the number input
+customPinSizeInput.addEventListener('input', (e) => {
+    const customSize = e.target.value;
+    if (customSize >= 12 && customSize <= 200) {
+        pinSizeRange.value = customSize; // Sync the range slider with the custom input
+        pinSizeDisplay.textContent = `${customSize}px`; // Update the label with the custom size
+    }
+});
