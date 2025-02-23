@@ -7,61 +7,60 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="map-container">
-    <div class="resizer"></div>
-    <div id="svg-container"></div>
-    <div class="location-form">
-        <div class="form-header">
-            Add Location
-        </div>
-        <div class="form-content">
-            <div class="form-group">
-                <label>Location Name</label>
-                <input type="text" id="location-name" placeholder="Enter location name">
-            </div>
-            
-            <div class="form-group">
-                <label>Map Symbol</label>
-                <select id="symbol-select" class="symbol-select">
-                    <option value="gpin">📍 Location Pin</option>
-                    <option value="🔴">🔴 Dot</option>
-                    <option value="⭐">⭐ Star</option>
-                    <option value="🎯">🎯 Target</option>
-                </select>
-            </div>
+    <div class="map-container">
+        <div id="svg-container"></div>
+        <div class="resizer"></div>
 
-            <div class="form-group">
-                <label>Colors</label>
-                <div class="color-group">
-                    <div>
-                        <small>Symbol</small>
-                        <input type="color" id="symbol-color" class="color-picker" value="#0070ED">
-                    </div>
-                    <div>
-                        <small>Map</small>
-                        <input type="color" id="map-color" class="color-picker" value="#d3d3d3">
+        <div class="location-form">
+            <div class="form-header">Add Location</div>
+            <div class="form-content">
+                <div class="form-group">
+                    <label>Location Name</label>
+                    <input type="text" id="location-name" placeholder="Enter location name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Pin Style</label>
+                    <select id="symbol-select" class="symbol-select">
+                        <option value="style1">Pin Style 1</option>
+                        <option value="style2">Pin Style 2</option>
+                        <option value="style3">Pin Style 3</option>
+                        <option value="style4">Pin Style 4</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Colors</label>
+                    <div class="color-group">
+                        <div>
+                            <small>Pin Color</small>
+                            <input type="color" id="symbol-color" class="color-picker" value="#FF4444">
+                        </div>
+                        <div>
+                            <small>Map Color</small>
+                            <input type="color" id="map-color" class="color-picker" value="#D3D3D3">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="addLocation()">Add Location</button>
-                <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="addLocation()">Add Location</button>
+                    <button class="btn btn-secondary" onclick="hideForm()">Cancel</button>
+                </div>
             </div>
 
             <div class="location-list" id="location-list"></div>
         </div>
-    </div>
 
-    <div class="delete-confirm">
-        <p>Are you sure you want to delete this location?</p>
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
-            <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
+        <div class="delete-confirm">
+            <p>Are you sure you want to delete this location?</p>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
+                <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
-
+    
   <script src="script.js"></script>
 </body>
 </html>

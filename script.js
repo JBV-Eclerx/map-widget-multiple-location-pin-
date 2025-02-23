@@ -7,19 +7,30 @@ let locations = [];
 let currentClickPos = { x: 0, y: 0 };
 let locationToDelete = null;
 let svgPoint = null;
-let pinSvg = '';
+let pins = {
+    style1: '',
+    style2: '',
+    style3: '',
+    style4: ''
+};
 
 // Store initial map width and height
 let initialMapWidth = mapContainer.offsetWidth;
 let initialMapHeight = mapContainer.offsetHeight;
 
-// Load both SVGs
+// Load all SVGs
 Promise.all([
     fetch('australia.svg').then(response => response.text()),
-    fetch('gpin.svg').then(response => response.text())
-]).then(([mapSvg, gpinSvg]) => {
+    fetch('pin_style_1.svg').then(response => response.text()),
+    fetch('pin_style_2.svg').then(response => response.text()),
+    fetch('pin_style_3.svg').then(response => response.text()),
+    fetch('pin_style_4.svg').then(response => response.text())
+]).then(([mapSvg, pin1, pin2, pin3, pin4]) => {
     svgContainer.innerHTML = mapSvg;
-    pinSvg = gpinSvg;
+    pins.style1 = pin1;
+    pins.style2 = pin2;
+    pins.style3 = pin3;
+    pins.style4 = pin4;
 
     const svg = svgContainer.querySelector('svg');
     svgPoint = svg.createSVGPoint();
@@ -73,57 +84,66 @@ function addPin(location) {
     pin.style.left = `${location.x}px`;
     pin.style.top = `${location.y}px`;
 
-    // Check if the symbol is the Google pin (gpin)
-    if (location.symbol === 'gpin') {
-        const coloredPinSvg = pinSvg.replace(/fill="[^"]*"/, `fill="${location.color}"`);
-
-        // Create a container for the SVG
-        const svgContainer = document.createElement('div');
-        svgContainer.className = 'google-pin';
-        svgContainer.innerHTML = coloredPinSvg;
-
-        // Ensure it's the right size for the pin (matching the other symbols)
-        svgContainer.style.width = '24px';
-        svgContainer.style.height = '24px';
-
-        pin.appendChild(svgContainer);
-    } else {
-        pin.innerHTML = location.symbol;function addPin(location) {
-            const pin = document.createElement('div');
-            pin.className = 'location-pin';
-            pin.title = location.name;
-            pin.dataset.id = location.id;
-        
-            // Calculate relative positions (percentages) based on initial size
-            location.xPercentage = location.x / initialMapWidth;
-            location.yPercentage = location.y / initialMapHeight;
-        
-            // Set the initial pin position using the current width and height
-            pin.style.left = `${location.x}px`;
-            pin.style.top = `${location.y}px`;
-        
-            // Check if the symbol is the Google pin (gpin)
-            if (location.symbol === 'gpin') {
-                // Create an img element to embed the SVG
-                const svgImg = document.createElement('img');
-                svgImg.src = 'gpin.svg';  // Path to your gpin.svg file
-                svgImg.style.width = '24px';  // Set the size to match the other symbols
-                svgImg.style.height = '24px';
-        
-                // If you want to color the pin, you need to edit the SVG inline (if possible), or you can modify the image color directly using a filter.
-                svgImg.style.filter = `fill(${location.color})`;  // Apply the color filter to the SVG image
-        
-                pin.appendChild(svgImg);  // Append the image to the pin
-            } else {
-                pin.innerHTML = location.symbol;
-                pin.style.color = location.color;
-            }
-        
-            mapContainer.appendChild(pin);
-        }
-        
-        pin.style.color = location.color;
+    // Create container for the SVG pin
+    const svgContainer = document.createElement('div');
+    svgContainer.className = 'pin-svg-container';
+    
+    // Get the appropriate SVG content based on the selected style
+    let pinSvg = pins[location.symbol];
+    
+    // Handle the color replacement for different SVGs
+    if (location.symbol === 'style1' || location.symbol === 'style4') {
+        // Standard fill replacement for style1 and style4
+        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);
+    } else if (location.symbol === 'style2' || location.symbol === 'style3') {
+        // For style2 and style3, ensure we target the correct color properties
+        pinSvg = pinSvg.replace(/stroke="[^"]*"/g, `stroke="${location.color}"`); // Check if `stroke` is used
+        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);  // Apply fill change
     }
+    
+    // Set the SVG with the selected size
+    svgContainer.innerHTML = pinSvg;
+    svgContainer.style.width = `${location.size || 24}px`;
+    svgContainer.style.height = `${location.size || 24}px`;
+
+    pin.appendChild(svgContainer);
+    
+    // Add resize handle
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'pin-resize-handle';
+    pin.appendChild(resizeHandle);
+
+    // Add resize functionality
+    let isResizing = false;
+    let startSize = 0;
+    let startY = 0;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startSize = parseInt(svgContainer.style.width);
+        startY = e.clientY;
+        e.stopPropagation();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        
+        const diff = startY - e.clientY;
+        const newSize = Math.max(12, Math.min(48, startSize + diff));
+        
+        svgContainer.style.width = `${newSize}px`;
+        svgContainer.style.height = `${newSize}px`;
+        
+        // Update location object
+        const locationObj = locations.find(loc => loc.id === parseInt(pin.dataset.id));
+        if (locationObj) {
+            locationObj.size = newSize;
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        isResizing = false;
+    });
 
     mapContainer.appendChild(pin);
 }
@@ -163,13 +183,15 @@ function addLocation() {
         x: currentClickPos.x,
         y: currentClickPos.y,
         symbol: symbol,
-        color: symbolColor
+        color: symbolColor,
+        size: 24 // Default size
     };
 
     locations.push(location);
     addPin(location);
     updateLocationList();
     nameInput.value = '';
+    hideForm();
 }
 
 function updateLocationList() {
@@ -180,16 +202,14 @@ function updateLocationList() {
         const item = document.createElement('div');
         item.className = 'location-item';
 
-        let symbolDisplay;
-        if (location.symbol === 'gpin') {
-            const coloredPinSvg = pinSvg.replace(/fill="[^"]*"/, `fill="${location.color}"`);
-            symbolDisplay = `<span class="pin-icon">${coloredPinSvg}</span>`;
-        } else {
-            symbolDisplay = `<span style="color: ${location.color}">${location.symbol}</span>`;
-        }
+        let pinSvg = pins[location.symbol];
+        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);
 
         item.innerHTML = `
-            <span class="pin-option">${symbolDisplay} ${location.name}</span>
+            <span class="pin-option">
+                <span class="pin-icon" style="width: 24px; height: 24px; display: inline-block;">${pinSvg}</span>
+                ${location.name}
+            </span>
             <button class="delete-btn" onclick="showDeleteConfirm(${location.id})">Delete</button>
         `;
         list.appendChild(item);
@@ -251,7 +271,6 @@ resizer.addEventListener('mousedown', (e) => {
     });
 });
 
-// Handle resizing the container and SVG
 function handleResize(e) {
     if (isResizing) {
         const width = e.clientX - mapContainer.getBoundingClientRect().left;

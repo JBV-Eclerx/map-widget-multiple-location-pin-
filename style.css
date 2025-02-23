@@ -1,134 +1,217 @@
 body {
-    margin: 0;
-    padding: 20px;
-  }
-  
-  #svg-container {
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    overflow: visible; /* Allow the SVG to scale without clipping */
-  }
-  
-  .map-container {
-    position: relative;
-    width: 480px;
-    height: 460px;
-    border: 1px solid #ccc;
-    overflow: visible; /* Make sure the SVG content isn't cut off */
-  }
-  
-
-  .location-form {
-    display: none;
-    position: absolute;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    min-width: 200px;
-    z-index: 1000;
-  }
-  
-  .location-form input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .location-form button {
-    padding: 8px 15px;
-    margin: 5px;
-    border: none;
-    border-radius: 4px;
-    background: #4CAF50;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .location-form button:hover {
-    background: #45a049;
-  }
-  
-  .location-pin {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    transform: translate(-50%, -50%);
-    cursor: pointer;
-    color: red;
-    font-size: 24px;
-    z-index: 100;
-    user-select: none;
-  }
-  
-  .delete-confirm {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.3);
-    z-index: 2000;
-  }
-  
-  .location-list {
-    margin-top: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-  }
-  
-  .location-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .delete-btn {
-    background: #ff4444 !important;
-  }
-  
-  .delete-btn:hover {
-    background: #cc0000 !important;
-  }
-  
-  .google-pin {
-    width: 24px;
-    height: 24px;
-    display: inline-block;
-    vertical-align: middle;
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
-  
-  .pin-option {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  
-  .location-pin.google-style {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .location-pin.google-style svg {
-    width: 100%;
-    height: 100%;
-  }
-  .resizer {
-    width: 10px;
-    height: 10px;
-    background-color: #888;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    cursor: se-resize;
-  }
+.map-container {
+  position: relative;
+  width: 480px;
+  height: 460px;
+  border: 1px solid #ccc;
+  overflow: visible;
+}
+
+#svg-container {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  overflow: visible;
+}
+
+#svg-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.location-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: move;
+  z-index: 100;
+  user-select: none;
+}
+
+.pin-svg-container {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  transition: all 0.2s ease;
+}
+
+.pin-svg-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.pin-resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border: 1px solid #666;
+  border-radius: 50%;
+  bottom: -4px;
+  right: -4px;
+  cursor: nw-resize;
+  z-index: 101;
+  display: none;
+}
+
+.location-pin:hover .pin-resize-handle {
+  display: block;
+}
+
+.location-form {
+  display: none;
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  min-width: 250px;
+  z-index: 1000;
+}
+
+.form-header {
+  font-weight: bold;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.color-group {
+  display: flex;
+  gap: 20px;
+}
+
+.color-picker {
+  width: 50px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #45a049;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background: #e9e9e9;
+}
+
+.delete-btn {
+  background: #ff4444 !important;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #cc0000 !important;
+}
+
+.delete-confirm {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+  z-index: 2000;
+  text-align: center;
+}
+
+.location-list {
+  margin-top: 15px;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.location-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.pin-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pin-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.pin-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.resizer {
+  width: 10px;
+  height: 10px;
+  background-color: #888;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
