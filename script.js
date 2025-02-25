@@ -5,7 +5,8 @@ const deleteConfirm = document.querySelector('.delete-confirm');
 const pinSizeRange = document.getElementById('pin-size');
 const pinSizeDisplay = document.getElementById('pin-size-display');
 const customPinSizeInput = document.getElementById('custom-pin-size');
-
+const coordinatesDisplay = document.getElementById('coordinates-display');
+const showCoordinatesToggle = document.getElementById('show-coordinates');
 
 let locations = [];
 let currentClickPos = { x: 0, y: 0 };
@@ -17,6 +18,21 @@ let pins = {
     style3: '',
     style4: ''
 };
+
+// Predefined locations with coordinates
+const predefinedLocations = [
+    { id: 'sydney', name: 'Sydney', x: 335, y: 235, symbol: 'style1', color: '#FF4444', size: 24 },
+    { id: 'melbourne', name: 'Melbourne', x: 295, y: 265, symbol: 'style2', color: '#4444FF', size: 24 },
+    { id: 'brisbane', name: 'Brisbane', x: 345, y: 190, symbol: 'style3', color: '#44FF44', size: 24 },
+    { id: 'perth', name: 'Perth', x: 90, y: 215, symbol: 'style4', color: '#FFAA44', size: 24 },
+    { id: 'adelaide', name: 'Adelaide', x: 245, y: 240, symbol: 'style1', color: '#AA44FF', size: 24 },
+    { id: 'darwin', name: 'Darwin', x: 220, y: 95, symbol: 'style2', color: '#FF44AA', size: 24 },
+    { id: 'hobart', name: 'Hobart', x: 295, y: 310, symbol: 'style3', color: '#44FFFF', size: 24 },
+    { id: 'canberra', name: 'Canberra', x: 320, y: 245, symbol: 'style4', color: '#FFFF44', size: 24 }
+];
+
+// Flag to track if showing coordinates is enabled
+let showCoordinates = false;
 
 // Store initial map width and height
 let initialMapWidth = mapContainer.offsetWidth;
@@ -59,7 +75,46 @@ Promise.all([
             path.style.fill = e.target.value;
         });
     });
+
+    // Set up coordinate display on hover
+    svg.addEventListener('mousemove', showMouseCoordinates);
+    
+    // Generate the predefined locations list
+    updatePredefinedLocationsList();
+    
+    // Move predefined locations container to the top of the map container
+    const predefinedLocations = document.querySelector('.predefined-locations');
+    if (predefinedLocations) {
+        mapContainer.insertBefore(predefinedLocations, mapContainer.firstChild);
+    }
+    
+    // Add "Edit Mode" label to the top
+    const editModeLabel = document.createElement('div');
+    editModeLabel.className = 'edit-mode-label';
+    editModeLabel.innerText = 'Edit Mode';
+    mapContainer.insertBefore(editModeLabel, mapContainer.firstChild);
 });
+
+function showMouseCoordinates(event) {
+    if (!showCoordinates) {
+        coordinatesDisplay.style.display = 'none';
+        return;
+    }
+    
+    const position = getClickPosition(event);
+    coordinatesDisplay.textContent = `X: ${Math.round(position.x)}, Y: ${Math.round(position.y)}`;
+    coordinatesDisplay.style.display = 'block';
+    coordinatesDisplay.style.left = `${event.clientX + 10}px`;
+    coordinatesDisplay.style.top = `${event.clientY + 10}px`;
+}
+
+// Toggle coordinates display
+function toggleCoordinatesDisplay() {
+    showCoordinates = showCoordinatesToggle.checked;
+    if (!showCoordinates) {
+        coordinatesDisplay.style.display = 'none';
+    }
+}
 
 function getClickPosition(event) {
     const svg = svgContainer.querySelector('svg');
@@ -105,43 +160,43 @@ function addPin(location) {
 
     pin.appendChild(svgContainer);
     
-// Add resize handle
-const resizeHandle = document.createElement('div');
-resizeHandle.className = 'pin-resize-handle';
-pin.appendChild(resizeHandle);
+    // Add resize handle
+    const resizeHandle = document.createElement('div');
+    resizeHandle.className = 'pin-resize-handle';
+    pin.appendChild(resizeHandle);
 
-// Add resize functionality
-let isResizing = false;
-let startSize = 0;
-let startY = 0;
+    // Add resize functionality
+    let isResizing = false;
+    let startSize = 0;
+    let startY = 0;
 
-resizeHandle.addEventListener('mousedown', (e) => {
-    isResizing = true;
-    startSize = parseInt(svgContainer.style.width);
-    startY = e.clientY;
-    e.stopPropagation();
-});
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startSize = parseInt(svgContainer.style.width);
+        startY = e.clientY;
+        e.stopPropagation();
+    });
 
-document.addEventListener('mousemove', (e) => {
-    if (!isResizing) return;
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
 
-    const diff = startY - e.clientY;
-    // Apply the new size with a limit of 12px min and 200px max
-    const newSize = Math.max(12, Math.min(200, startSize + diff));
+        const diff = startY - e.clientY;
+        // Apply the new size with a limit of 12px min and 200px max
+        const newSize = Math.max(12, Math.min(200, startSize + diff));
 
-    svgContainer.style.width = `${newSize}px`;
-    svgContainer.style.height = `${newSize}px`;
+        svgContainer.style.width = `${newSize}px`;
+        svgContainer.style.height = `${newSize}px`;
 
-    // Update location object with new size
-    const locationObj = locations.find(loc => loc.id === parseInt(pin.dataset.id));
-    if (locationObj) {
-        locationObj.size = newSize;
-    }
-});
+        // Update location object with new size
+        const locationObj = locations.find(loc => loc.id === pin.dataset.id);
+        if (locationObj) {
+            locationObj.size = newSize;
+        }
+    });
 
-document.addEventListener('mouseup', () => {
-    isResizing = false;
-});
+    document.addEventListener('mouseup', () => {
+        isResizing = false;
+    });
 
     mapContainer.appendChild(pin);
 }
@@ -162,6 +217,10 @@ mapContainer.addEventListener('contextmenu', (e) => {
     if (rect.bottom > window.innerHeight) {
         locationForm.style.top = `${window.innerHeight - rect.height - 10}px`;
     }
+    
+    // Set the coordinates in the form
+    document.getElementById('location-x').value = Math.round(currentClickPos.x);
+    document.getElementById('location-y').value = Math.round(currentClickPos.y);
 });
 
 function addLocation() {
@@ -170,20 +229,54 @@ function addLocation() {
     const symbol = document.getElementById('symbol-select').value;
     const symbolColor = document.getElementById('symbol-color').value;
     const pinSize = document.getElementById('pin-size').value;
+    const xCoord = parseInt(document.getElementById('location-x').value);
+    const yCoord = parseInt(document.getElementById('location-y').value);
 
     if (name === '') {
         alert('Please enter a location name');
         return;
     }
 
+    // Check if name matches a predefined location
+    const predefinedLocation = predefinedLocations.find(loc => 
+        loc.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (predefinedLocation) {
+        // Show confirmation dialog to use predefined coordinates
+        if (confirm(`"${name}" is a predefined location. Would you like to use the predefined coordinates instead?`)) {
+            // Use predefined location details
+            const location = {
+                id: Date.now().toString(),
+                name: predefinedLocation.name,
+                x: predefinedLocation.x,
+                y: predefinedLocation.y,
+                symbol: symbol,
+                color: symbolColor,
+                size: pinSize
+            };
+            
+            locations.push(location);
+            addPin(location);
+            updateLocationList();
+            nameInput.value = '';
+            hideForm();
+            return;
+        }
+    }
+
+    // Use custom coordinates if provided, otherwise use the click position
+    const x = !isNaN(xCoord) ? xCoord : currentClickPos.x;
+    const y = !isNaN(yCoord) ? yCoord : currentClickPos.y;
+
     const location = {
-        id: Date.now(),
+        id: Date.now().toString(),
         name: name,
-        x: currentClickPos.x,
-        y: currentClickPos.y,
+        x: x,
+        y: y,
         symbol: symbol,
         color: symbolColor,
-        size: pinSize // Set the pin size from the form input
+        size: pinSize
     };
 
     locations.push(location);
@@ -191,6 +284,58 @@ function addLocation() {
     updateLocationList();
     nameInput.value = '';
     hideForm();
+}
+
+// Function to add a predefined location
+function addPredefinedLocation(locationId) {
+    const predefined = predefinedLocations.find(loc => loc.id === locationId);
+    
+    if (predefined) {
+        // Check if location already exists to avoid duplicates
+        const exists = locations.some(loc => 
+            loc.name === predefined.name && 
+            Math.abs(loc.x - predefined.x) < 5 && 
+            Math.abs(loc.y - predefined.y) < 5
+        );
+        
+        if (!exists) {
+            // Create a deep copy and assign a unique ID
+            const location = {
+                ...predefined,
+                id: Date.now().toString()
+            };
+            
+            locations.push(location);
+            addPin(location);
+            updateLocationList();
+        } else {
+            alert(`${predefined.name} is already on the map!`);
+        }
+    }
+}
+
+function updatePredefinedLocationsList() {
+    const list = document.getElementById('predefined-locations-list');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    predefinedLocations.forEach(location => {
+        const item = document.createElement('div');
+        item.className = 'predefined-location-item';
+        
+        let pinSvg = pins[location.symbol];
+        pinSvg = pinSvg.replace(/fill="[^"]*"/g, `fill="${location.color}"`);
+        
+        item.innerHTML = `
+            <span class="pin-option">
+                <span class="pin-icon" style="width: 24px; height: 24px; display: inline-block;">${pinSvg}</span>
+                ${location.name}
+            </span>
+            <button class="add-btn" onclick="addPredefinedLocation('${location.id}')">Add</button>
+        `;
+        list.appendChild(item);
+    });
 }
 
 function updateLocationList() {
@@ -209,7 +354,7 @@ function updateLocationList() {
                 <span class="pin-icon" style="width: 24px; height: 24px; display: inline-block;">${pinSvg}</span>
                 ${location.name}
             </span>
-            <button class="delete-btn" onclick="showDeleteConfirm(${location.id})">Delete</button>
+            <button class="delete-btn" onclick="showDeleteConfirm('${location.id}')">Delete</button>
         `;
         list.appendChild(item);
     });
@@ -308,7 +453,7 @@ function updatePinPositions() {
     const pins = document.querySelectorAll('.location-pin');
     pins.forEach(pin => {
         const locationId = pin.dataset.id;
-        const location = locations.find(loc => loc.id === Number(locationId));
+        const location = locations.find(loc => loc.id === locationId);
 
         if (location) {
             // Calculate new positions based on the new size of the map
@@ -325,6 +470,7 @@ function updatePinPositions() {
         }
     });
 }
+
 // Update pin size display dynamically as the range is adjusted
 pinSizeRange.addEventListener('input', (e) => {
     const pinSize = e.target.value;
@@ -339,4 +485,30 @@ customPinSizeInput.addEventListener('input', (e) => {
         pinSizeRange.value = customSize; // Sync the range slider with the custom input
         pinSizeDisplay.textContent = `${customSize}px`; // Update the label with the custom size
     }
+});
+
+// Add event listener for coordinates toggle
+if (showCoordinatesToggle) {
+    showCoordinatesToggle.addEventListener('change', toggleCoordinatesDisplay);
+}
+// Add this to your script.js file to handle the predefined locations panel toggle
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('toggle-predefined');
+    const predefinedList = document.getElementById('predefined-locations-list');
+    
+    // Set initial state
+    let isPredefinedVisible = true;
+    
+    toggleBtn.addEventListener('click', function() {
+        if (isPredefinedVisible) {
+            predefinedList.style.display = 'none';
+            toggleBtn.textContent = '▲';
+            isPredefinedVisible = false;
+        } else {
+            predefinedList.style.display = 'block';
+            toggleBtn.textContent = '▼';
+            isPredefinedVisible = true;
+        }
+    });
 });
